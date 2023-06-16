@@ -10,6 +10,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 public class HttpHello {
+    final  static String baseURL= "https://jsonplaceholder.typicode.com";
     final static HttpClient CL = HttpClient.newHttpClient();
     final static Gson GSON = new Gson();
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -26,10 +27,38 @@ public class HttpHello {
         System.out.println(getUserByName("Bret"));      //m13-t1.6 get user by name
 
     }
+    public static List<Comment> getAllPostComments(int postId) throws IOException, InterruptedException {
+        final var request = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL+"/posts/"+postId+"/comments"))
+                .GET()
+                .build();
+        final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode()==200){
+            Type listType = new TypeToken<List<Comment>>(){}.getType();
+            return GSON.fromJson(response.body(),listType);
+        }else {
+            throw new IOException("post id:"+postId+" server response:"+response.statusCode());
+        }
+
+    }
+    public static List<Post> getAllUserPosts(int userId) throws IOException, InterruptedException {
+        final var request = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL+"/users/"+userId+"/posts"))
+                .GET()
+                .build();
+        final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode()==200){
+            Type listType = new TypeToken<List<Post>>(){}.getType();
+            return GSON.fromJson(response.body(),listType);
+        }else {
+            throw new IOException("user id:"+userId+" server response:"+response.statusCode());
+        }
+
+    }
     public static User newUser(String username) throws IOException, InterruptedException {
         String jsonStr="{ \"username\": \""+username+"\"}";
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/"))
+                .uri(URI.create(baseURL+"/users/"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonStr))
                 .build();
@@ -39,7 +68,7 @@ public class HttpHello {
     public static User updateUser(User newuser) throws IOException, InterruptedException {
         String jsonStr=GSON.toJson(newuser);//"{ \"username\": \""+username+"\"}";
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/"+newuser.getId()))
+                .uri(URI.create(baseURL+"/users/"+newuser.getId()))
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonStr))
                 .build();
@@ -53,7 +82,7 @@ public class HttpHello {
     }
     public static int deleteUser(int id) throws IOException, InterruptedException {
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/"+id))
+                .uri(URI.create(baseURL+"/users/"+id))
                 .DELETE()
                 .build();
         final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
@@ -61,7 +90,7 @@ public class HttpHello {
     }
     public static User getUserByName(String name) throws IOException, InterruptedException {
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/?username="+name))
+                .uri(URI.create(baseURL+"/users/?username="+name))
                 .GET()
                 .build();
         final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
@@ -77,7 +106,7 @@ public class HttpHello {
     }
     public static User getUserById(int id) throws IOException, InterruptedException {
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/"+id))
+                .uri(URI.create(baseURL+"/users/"+id))
                 .GET()
                 .build();
         final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
@@ -89,7 +118,7 @@ public class HttpHello {
     }
     public static List<User> getAllUser() throws IOException, InterruptedException {
         final var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users"))
+                .uri(URI.create(baseURL+"/users"))
                 .GET()
                 .build();
         final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());

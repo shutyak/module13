@@ -19,12 +19,26 @@ public class HttpHello {
         user.setId(1);
         user.setUsername("john");
         user.setName("John Smith");
-        var updatedUser= updateUser(user);                         //m13-t1.2 update user
+        var updatedUser= updateUser(user);              //m13-t1.2 update user
         System.out.println(updatedUser.getId()+" "+updatedUser.getUsername());
         System.out.println(deleteUser(user.getId()));   //m13-t1.3 delete user
         System.out.println(getAllUser());               //m13-t1.4 get all user
         System.out.println(getUserById(1));             //m13-t1.5 get user by id
         System.out.println(getUserByName("Bret"));      //m13-t1.6 get user by name
+
+    }
+    public static List<Task> getAllUserTasks(int userId) throws IOException, InterruptedException {
+        final var request = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL+"/users/"+userId+"/todos"))
+                .GET()
+                .build();
+        final var response = CL.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode()==200){
+            Type listType = new TypeToken<List<Task>>(){}.getType();
+            return GSON.fromJson(response.body(),listType);
+        }else {
+            throw new IOException("user id:"+userId+" server response:"+response.statusCode());
+        }
 
     }
     public static List<Comment> getAllPostComments(int postId) throws IOException, InterruptedException {
